@@ -1,0 +1,31 @@
+name: Windows x64 build
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
+          architecture: x64
+      - name: Build and test
+        shell: pwsh
+        run: |
+          # Optional: place the complete official ExifTool package in vendor/exiftool.
+          if (Test-Path 'vendor/exiftool/exiftool.exe') {
+            ./scripts/build_windows.ps1 -ExifToolDirectory 'vendor/exiftool'
+          } else {
+            ./scripts/build_windows.ps1
+          }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MediaGPSChecker-Windows-x64
+          path: dist/MediaGPSChecker-Windows-x64.zip
+          if-no-files-found: error
